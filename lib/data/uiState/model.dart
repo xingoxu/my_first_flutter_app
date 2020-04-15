@@ -1,9 +1,8 @@
 class UIState {
   int tabIndex;
-  String title;
-  UIState({this.tabIndex = 0, this.title = "Home"});
+  UIState({this.tabIndex = 0});
   UIState.clone(UIState state)
-      : this(tabIndex: state.tabIndex, title: state.title);
+      : this(tabIndex: state.tabIndex);
 
   UIState clone() => UIState.clone(this);
 }

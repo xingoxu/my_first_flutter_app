@@ -15,17 +15,17 @@ class ScheduleWidget extends StatefulWidget {
   ScheduleWidget({this.monthShowing}) : super();
 
   @override
-  State<StatefulWidget> createState() => ScheduleState(monthShowing);
+  State<StatefulWidget> createState() => ScheduleState();
 }
 
 class ScheduleState extends State<ScheduleWidget> {
   DateTime monthShowing;
   List<List<List<_WidgetPlaceholder>>> currentCalendarEventWidgets;
-  ScheduleState(this.monthShowing) : super();
 
   @override
   Widget build(BuildContext context) {
     _setContextVar();
+    this.setCalendarEvent();
 
     final rowLength =
         ((getNumberOfDaysInMonth(monthShowing.year, monthShowing.month) +
@@ -41,8 +41,11 @@ class ScheduleState extends State<ScheduleWidget> {
             child: _buildEventWidget(rowIndex)),
       );
     }).toList(growable: true);
-    return new Column(
-      children: rows,
+    return IgnorePointer(
+      ignoring: true,
+      child: new Column(
+        children: rows,
+      ),
     );
   }
 
@@ -50,6 +53,7 @@ class ScheduleState extends State<ScheduleWidget> {
   TextStyle _dayTextStyle;
 
   void _setContextVar() {
+    this.monthShowing = widget.monthShowing;
     _dayTextStyle = Theme.of(context).textTheme.body1;
 
     final constraints = BoxConstraints(
@@ -73,39 +77,35 @@ class ScheduleState extends State<ScheduleWidget> {
   }
 
   Widget _buildEventWidget(int rowIndex) {
-    return FutureBuilder<List<IndexFeed>>(
-      future: indexFeedsPromise,
-      builder: (context, snapshot) {
-        if (!snapshot.hasData || currentCalendarEventWidgets == null) {
-          return FittedBox();
-        }
+    if (currentCalendarEventWidgets == null) {
+      return FittedBox();
+    }
 
-        return Column(
-          children: currentCalendarEventWidgets[rowIndex]
-              .map((rowWidgets) => Row(
-                    children: rowWidgets
-                        .map((widget) => buildTask(widget.feed, widget.dayLast))
-                        .toList(),
-                  ))
-              .toList(),
-        );
-      },
+    return Column(
+      children: currentCalendarEventWidgets[rowIndex]
+          .map((rowWidgets) => Row(
+                children: rowWidgets
+                    .map((widget) => buildTask(widget.feed, widget.dayLast))
+                    .toList(),
+              ))
+          .toList(),
     );
   }
-
-  Future<List<IndexFeed>> indexFeedsPromise;
 
   @override
   void initState() {
     super.initState();
-    indexFeedsPromise = getIndexFeeds().then((data) {
-      this.setCalendarEvent(data);
-      return data;
+    getIndexFeeds().then((data) {
+      setState(() {
+        indexFeeds = data;
+      });
     });
   }
 
-  void setCalendarEvent(List<IndexFeed> indexFeeds) {
-    var feeds = [...indexFeeds];
+  List<IndexFeed> indexFeeds;
+
+  void setCalendarEvent() {
+    var feeds = indexFeeds == null ? [] : [...indexFeeds];
     final _totalDays =
         getNumberOfDaysInMonth(monthShowing.year, monthShowing.month);
 
@@ -119,24 +119,22 @@ class ScheduleState extends State<ScheduleWidget> {
 
     // filter feeds don't need to show on this month
     // sort the oldest to the newest
-    feeds
-        .where((feed) {
-          return !(DateTime.parse(feed.startTime).isAfter(monthEnd) ||
-              DateTime.parse(feed.endTime).isBefore(monthStart));
-        })
-        .toList(growable: true)
-        .sort((feedA, feedB) {
-          var startTimeA = DateTime.parse(feedA.startTime);
-          var startTimeB = DateTime.parse(feedB.startTime);
-          if (startTimeA.isBefore(startTimeB) == false &&
-              startTimeA.isAfter(startTimeB) == false) {
-            return DateTime.parse(feedA.endTime)
-                    .isAfter(DateTime.parse(feedB.endTime))
-                ? 1
-                : -1;
-          }
-          return startTimeA.isBefore(startTimeB) ? -1 : 1;
-        });
+    feeds = feeds.where((feed) {
+      return !(DateTime.parse(feed.startTime).isAfter(monthEnd) ||
+          DateTime.parse(feed.endTime).isBefore(monthStart));
+    }).toList(growable: true)
+      ..sort((feedA, feedB) {
+        var startTimeA = DateTime.parse(feedA.startTime);
+        var startTimeB = DateTime.parse(feedB.startTime);
+        if (startTimeA.isBefore(startTimeB) == false &&
+            startTimeA.isAfter(startTimeB) == false) {
+          return DateTime.parse(feedA.endTime)
+                  .isAfter(DateTime.parse(feedB.endTime))
+              ? 1
+              : -1;
+        }
+        return startTimeA.isBefore(startTimeB) ? -1 : 1;
+      });
 
     // set date schedule
     for (var i = 0; i < feeds.length; i++) {
@@ -165,7 +163,10 @@ class ScheduleState extends State<ScheduleWidget> {
         if ((actualDate <= 0 || (actualDate) > _totalDays)) {
           continue;
         }
-        maxV = max(mCalendarEvent[actualDate].length, maxV);
+        var length = mCalendarEvent[actualDate] == null
+            ? 0
+            : mCalendarEvent[actualDate].length;
+        maxV = max(length, maxV);
       }
 
       // set row widget
@@ -178,9 +179,15 @@ class ScheduleState extends State<ScheduleWidget> {
           final tableCellIndex = rowIndex * NUM_WEEK_DAYS + i + 1;
           final actualDate = tableCellIndex - _beginPadding;
 
-          IndexFeed feedNow = (actualDate <= 0 || (actualDate) > _totalDays)
-              ? null
-              : mCalendarEvent[actualDate][j];
+          IndexFeed feedNow;
+          // isDate
+          if (!((actualDate <= 0 || (actualDate) > _totalDays))) {
+            if (mCalendarEvent[actualDate] != null &&
+                mCalendarEvent[actualDate].length > j &&
+                mCalendarEvent[actualDate][j] != null)
+              feedNow = mCalendarEvent[actualDate][j];
+          }
+
           if (i == 0) {
             feedLast = feedNow;
             continue;

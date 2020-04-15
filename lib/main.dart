@@ -11,6 +11,11 @@ import 'data/reducers.dart';
 import 'data/state.dart';
 import 'components/bottomNavigation.dart';
 
+// TODO
+// https://pub.dev/packages/flutter_statusbarcolor
+// https://github.com/flutter/flutter/issues/24472#issuecomment-440015464
+
+
 void main() {
   final store = new Store<AppState>(
     appStateReducer,
@@ -80,12 +85,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     _bottomNavigation = BottomNavigation(items: mainView);
 
     _navigationViews = mainView
-        .map((obj) => Scaffold(
-              appBar: AppBar(
-                title: Text("Home"),
-              ),
-              body: obj["view"],
-            ))
+        .map((obj) => obj["view"])
         .map(addFadeTransition)
         .toList();
   }

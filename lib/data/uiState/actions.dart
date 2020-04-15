@@ -5,7 +5,3 @@ class ChangeTabIndexAction implements UIStateAction {
   ChangeTabIndexAction(this.targetIndex);
 }
 
-class ChangeAppBarTitleAction implements UIStateAction {
-  String targetTitle;
-  ChangeAppBarTitleAction(this.targetTitle);
-}

@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_playground/components/mainView.dart';
 import 'package:flutter_playground/data/api.dart';
 import 'package:flutter_playground/data/indexFeed/index.dart';
-import 'package:flutter_playground/data/state.dart';
-import 'package:flutter_playground/data/uiState/actions.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 
 class IndexFeedsListWidget extends StatefulWidget implements MainView {
@@ -25,12 +23,6 @@ class IndexFeedsState extends State<IndexFeedsListWidget> {
   void initState() {
     super.initState();
     indexFeedsPromise = getIndexFeeds();
-    final store = StoreProvider.of<AppState>(context, listen: false);
-    store.onChange.listen((appState) {
-      if (appState.uiState.tabIndex == this.tabIndex) {
-        store.dispatch(ChangeAppBarTitleAction(title));
-      }
-    });
   }
 
   String formatNumber(int number) {
@@ -46,30 +38,41 @@ class IndexFeedsState extends State<IndexFeedsListWidget> {
     return FutureBuilder<List<IndexFeed>>(
         future: indexFeedsPromise,
         builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return ListView.builder(
-                itemCount: snapshot.data.length,
-                itemBuilder: (context, i) {
-                  if (i.isOdd) return Divider();
-                  final index = i ~/ 2;
-                  final _endTimeDate =
-                      DateTime.parse(snapshot.data[index].endTime).toLocal();
-                  return GestureDetector(
-                    child: Card(
-                      child: ListTile(
-                        title: Text(snapshot.data[index].title),
-                        subtitle: Text(formatDate(_endTimeDate)),
+          Widget body = (() {
+            if (snapshot.hasData) {
+              return ListView.builder(
+                  // itemCount: (snapshot.data.length-1)*2+1,
+                  itemCount: snapshot.data.length,
+                  itemBuilder: (context, i) {
+                    // if (i.isOdd) return Divider();
+                    // final index = i ~/ 2;
+                    final index = i;
+                    final _endTimeDate =
+                        DateTime.parse(snapshot.data[index].endTime).toLocal();
+                    return GestureDetector(
+                      child: Card(
+                        child: ListTile(
+                          title: Text(snapshot.data[index].title),
+                          subtitle: Text(formatDate(_endTimeDate)),
+                        ),
                       ),
-                    ),
-                    onTap: () {
-                      print('tapped from card');
-                    },
-                  );
-                });
-          } else if (snapshot.hasError) {
-            return Text("${snapshot.error}");
-          }
-          return CircularProgressIndicator();
+                      onTap: () {
+                        print('tapped from card');
+                      },
+                    );
+                  });
+            } else if (snapshot.hasError) {
+              return Text("${snapshot.error}");
+            }
+            return CircularProgressIndicator();
+          })();
+
+          return Scaffold(
+            appBar: AppBar(
+              title: Text("Home"),
+            ),
+            body: body,
+          );
         });
   }
 }

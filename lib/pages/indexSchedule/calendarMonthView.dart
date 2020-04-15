@@ -6,6 +6,10 @@ import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
 
 class CalendarMonthView extends StatefulWidget {
+  final DateTime _monthShowing;
+  CalendarMonthView({DateTime monthShowing})
+      : this._monthShowing = monthShowing ?? DateTime.now(),
+        super();
   @override
   State<StatefulWidget> createState() => CalendarState();
 }
@@ -14,6 +18,12 @@ class CalendarState extends State<CalendarMonthView> {
   PageController _pageController = PageController();
 
   final int numWeekDays = 7;
+
+  @override
+  Widget build(BuildContext context) {
+    setContextVar();
+    return getPageView(context);
+  }
 
   @override
   void dispose() {
@@ -76,7 +86,7 @@ class CalendarState extends State<CalendarMonthView> {
     );
   }
 
-  final _monthShowing = DateTime.now();
+  DateTime _monthShowing;
   final _nextMonthDate = DateTime.now().add(new Duration(days: 30));
 
   Widget getPageView(BuildContext context) {
@@ -111,16 +121,11 @@ class CalendarState extends State<CalendarMonthView> {
     ]);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    setContextVar();
-    return getPageView(context);
-  }
-
   BorderSide _tableBorder;
   TextStyle _dayTextStyle;
 
   void setContextVar() {
+    _monthShowing = widget._monthShowing;
     _tableBorder = BorderSide(width: 1, color: Theme.of(context).dividerColor);
     _dayTextStyle = Theme.of(context).textTheme.body1;
   }
