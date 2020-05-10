@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_playground/pages/indexSchedule/components/schedule.dart';
+import 'package:flutter_playground/pages/root/indexSchedule/components/schedule.dart';
 import 'package:flutter_playground/utils/calendarHelpers.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 import 'package:redux/redux.dart';
@@ -165,10 +165,12 @@ class CalendarState extends State<CalendarMonthView> {
         ),
         child: Align(
             alignment: Alignment.topLeft,
-            child: Container(
-              padding: EdgeInsets.fromLTRB(2, 2, 2, 2),
+            child: Padding(
+              padding: _isToday ? EdgeInsets.all(0) : EdgeInsets.all(2),
               child: Container(
-                padding: EdgeInsets.fromLTRB(3, 3, 3, 3),
+                padding: _isToday
+                    ? EdgeInsets.fromLTRB(8, 5, 8, 5)
+                    : EdgeInsets.all(3),
                 decoration: _isToday
                     ? BoxDecoration(
                         shape: BoxShape.circle,

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_playground/components/mainView.dart';
-import 'package:flutter_playground/data/state.dart';
-import 'package:flutter_playground/data/uiState/actions.dart';
-import 'package:flutter_playground/pages/indexSchedule/calendarMonthView.dart';
+import 'package:flutter_playground/data/state.dart' hide ReduxState;
+import 'package:flutter_playground/pages/root/indexSchedule/calendarMonthView.dart';
 import 'package:flutter_redux/flutter_redux.dart';
 
 class IndexSchedule extends StatefulWidget implements MainView {

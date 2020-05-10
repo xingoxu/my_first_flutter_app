@@ -19,13 +19,18 @@ class BottomNavigation extends StatelessWidget {
     return new StoreConnector<AppState, _VM>(
         converter: (store) => new _VM(
             state: store.state.uiState,
-            callback: (index) => store.dispatch(ChangeTabIndexAction(index))),
+            callback: (index) {
+              if (index != store.state.uiState.tabIndex)
+                store.dispatch(ChangeTabIndexAction(index));
+            }),
         builder: (context, vm) {
           return BottomNavigationBar(
-            items: items.map((obj) => BottomNavigationBarItem(
-                  icon: obj["icon"],
-                  title: obj["title"],
-                )).toList(),
+            items: items
+                .map((obj) => BottomNavigationBarItem(
+                      icon: obj["icon"],
+                      title: obj["title"],
+                    ))
+                .toList(),
             currentIndex: vm.state.tabIndex,
             onTap: vm.callback,
           );

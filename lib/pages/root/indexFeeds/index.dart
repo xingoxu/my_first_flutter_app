@@ -6,7 +6,7 @@ import 'package:flutter_redux/flutter_redux.dart';
 
 class IndexFeedsListWidget extends StatefulWidget implements MainView {
   @override
-  State<IndexFeedsListWidget> createState() => IndexFeedsState(tabIndex);
+  State<IndexFeedsListWidget> createState() => IndexFeedsState();
 
   IndexFeedsListWidget({@required this.tabIndex}) : super();
   @override
@@ -14,9 +14,8 @@ class IndexFeedsListWidget extends StatefulWidget implements MainView {
 }
 
 class IndexFeedsState extends State<IndexFeedsListWidget> {
-  final int tabIndex;
   final String title = "Home";
-  IndexFeedsState(this.tabIndex) : super();
+  IndexFeedsState() : super();
 
   Future<List<IndexFeed>> indexFeedsPromise;
   @override
@@ -69,7 +68,7 @@ class IndexFeedsState extends State<IndexFeedsListWidget> {
 
           return Scaffold(
             appBar: AppBar(
-              title: Text("Home"),
+              title: Text(this.title),
             ),
             body: body,
           );
